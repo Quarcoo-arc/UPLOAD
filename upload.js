@@ -1,31 +1,38 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const body_parser = require('body-parser');
-const multer = require('multer');
-const {GridFsStorage} = require('multer-gridfs-storage');
-const Grid = require('gridfs-stream');
-const path = require('path');
-const crypto = require('crypto');
-const methodOverride = require('method-override');
+const express = require("express");
+const mongoose = require("mongoose");
+const body_parser = require("body-parser");
+const multer = require("multer");
+const { GridFsStorage } = require("multer-gridfs-storage");
+const Grid = require("gridfs-stream");
+const path = require("path");
+const crypto = require("crypto");
+const methodOverride = require("method-override");
+const File = require("./model/fileSchema");
 
 const exp = express();
 const bodyParser = body_parser;
 
 exp.use(bodyParser.json());
-exp.use(express.static('front'));
-exp.use(methodOverride('_method'));
+exp.use(express.static("./front"));
+exp.use(methodOverride("_method"));
 
-const URI = 'mongodb://localhost:27017/questionsdb';
+const URI = "mongodb://localhost:27017/questionsdb";
 
 const connection = mongoose.createConnection(URI);
 
+process.on("uncaughtException", (err) => {
+  console.log("UNCAUGHT EXCEPTION, APP SHUTTING DOWN!");
+  console.log(err.name, err.name);
+  process.exit(1);
+});
+
 let gfs;
 
-connection.once('open', () => {
-  gfs = Grid(connection.db, mongoose.mongo)
-  gfs.collection('uploads');
-  console.log('Database connected');
-})
+connection.once("open", () => {
+  gfs = Grid(connection.db, mongoose.mongo);
+  gfs.collection("uploads");
+  console.log("Database connected");
+});
 
 const storage = new GridFsStorage({
   url: URI,
@@ -35,22 +42,23 @@ const storage = new GridFsStorage({
         if (err) {
           return reject(err);
         }
-        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const filename = buf.toString("hex") + path.extname(file.originalname);
         const fileInfo = {
           filename: filename,
-          bucketName: 'uploads'
+          bucketName: "uploads",
         };
         resolve(fileInfo);
-        console.log('File added successfully');
+        console.log("File added successfully");
       });
-    }); 
-  }
+    });
+  },
 });
 
-const upload = multer({storage});
+const upload = multer({ dest: "public/files" });
 
-exp.post('/upload', upload.single('file'), (req, res) => {
- console.log({file: req.file});
+//API Endpoint for uploading file
+exp.post("/upload", upload.single("file"), (req, res) => {
+  console.log({ file: req.file });
 });
 
 // exp.get('/files', (req, res) => {
@@ -76,10 +84,11 @@ exp.post('/upload', upload.single('file'), (req, res) => {
 //   };
 // })
 
-exp.get('/', (req, res) => {
+exp
+  .get("/", (req, res) => {
     res.set({ "Allow-access-Allow-Origin": "*" });
-    return res.redirect('upload.html');
+    return res.redirect("upload.html");
   })
   .listen(3000);
 
-console.log('Listening from port 3000');
+console.log("Listening from port 3000");
