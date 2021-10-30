@@ -54,6 +54,7 @@ const storage = new GridFsStorage({
   },
 });
 
+//Configuration for multer
 const upload = multer({ dest: "public/files" });
 
 //API Endpoint for uploading file
