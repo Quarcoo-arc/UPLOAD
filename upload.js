@@ -139,7 +139,7 @@ exp.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 //Endpoint for viewing uploads on the frontend
-exp.get("/upload/files", async (req, res) => {
+exp.get("/files", async (req, res) => {
   try {
     const files = await File.find();
     res.status(200).json({
@@ -151,6 +151,22 @@ exp.get("/upload/files", async (req, res) => {
       status: "Fail",
       error,
     });
+  }
+});
+
+// get a specific file by name
+exp.get("/files/:filename", async (req, res) => {
+  try {
+    const file = await File.findOne({ name: "files/" + req.params.filename });
+    if (!file) {
+      return res.status(404).json({
+        err: "File Not Found",
+      });
+    } else {
+      return res.json(file);
+    }
+  } catch (error) {
+    console.log("Error: ", error);
   }
 });
 
