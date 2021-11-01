@@ -48,26 +48,6 @@ connection.once("open", () => {
   console.log("Database connected");
 });
 
-// const storage = new GridFsStorage({
-//   url: URI,
-//   file: (req, file) => {
-//     return new Promise((resolve, reject) => {
-//       crypto.randomBytes(16, (err, buf) => {
-//         if (err) {
-//           return reject(err);
-//         }
-//         const filename = buf.toString("hex") + path.extname(file.originalname);
-//         const fileInfo = {
-//           filename: filename,
-//           bucketName: "uploads",
-//         };
-//         resolve(fileInfo);
-//         console.log("File added successfully");
-//       });
-//     });
-//   },
-// });
-
 //Configuration for multer
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -103,7 +83,7 @@ exp.post("/upload", upload.single("file"), async (req, res) => {
     const fileUploaded = req.file;
     console.log({ file: fileUploaded });
     if (!fileUploaded) {
-      return res.send("File not Foune!");
+      return res.send("File not Found!");
     } else {
       const newFile = await File.create(
         {
@@ -120,22 +100,6 @@ exp.post("/upload", upload.single("file"), async (req, res) => {
     console.log("Error: ", error);
     res.send("Error Adding File!");
   }
-  // try {
-  //   const newFile = await File.create({
-  //     name: req.file.filename,
-  //   });
-  //   res.status(200).json({
-  //     status: "success",
-  //     message: "File created successfully!!",
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  //   res.json({
-  //     error,
-  //   });
-  // } finally {
-  //   res.end();
-  // }
 });
 
 //Endpoint for viewing uploads on the frontend
@@ -170,28 +134,6 @@ exp.get("/files/:filename", async (req, res) => {
   }
 });
 
-// exp.get('/files', (req, res) => {
-//   gfs.files.find().toArray((err, files) => {
-//     if(!files || files.length === 0) {
-//       return res.status(404).json({
-//         err: 'File(s) Not Found'
-//       });
-//     }
-//     return res.json(files);
-//   });
-// })
-
-// //get a specific file by name
-// exp.get('/files/:filename', (req, res) => {
-//   gfs.files.findOne({filename: req.params.filename}), (err, file) => {
-//     if(!file) {
-//       return res.status(404).json({
-//         err: 'File Not Found'
-//       });
-//     }
-//     return res.json(file);
-//   };
-// })
 
 exp
   .get("/", (req, res) => {
